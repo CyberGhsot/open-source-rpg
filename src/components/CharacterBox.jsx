@@ -5,11 +5,13 @@ import { Button } from '@mui/material';
 import Image from 'next/image';
 
 import {
-  Link as LinkIcon,
+  Link as AccountBoxIcon,
   Delete as DeleteIcon,
   Favorite as HeartIcon,
   FavoriteBorder as HeartIconNoLife,
-  VideoCameraFront as CameraIcon
+  VideoCameraFront as CameraIcon,
+  EmojiEmotions as SanIcon,
+  InsertEmoticon as SannoSan,
 } from '@mui/icons-material';
 
 import useModal from '../hooks/useModal';
@@ -40,6 +42,10 @@ const styles = (theme) => ({
   },
 
   hpInfo: {
+    fontWeight: 'bold',
+  },
+  
+  snInfo: {
     fontWeight: 'bold',
   },
 
@@ -112,6 +118,25 @@ function CharacterBox({ classes, character, deleteCharacter, ...rest }) {
           <span className={classes.hpInfo}>
             {character.current_hit_points}/{character.max_hit_points}
           </span>
+          
+          <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#0a8fe8',
+            gap: '3px',
+            marginLeft: '10px',
+          }}
+        >
+          {character.current_san_points === 0 ? (
+            <SannoSan />
+          ) : (
+            <SanIcon />
+          )}
+          <span className={classes.snInfo}>
+            {character.current_san_points}/{character.max_san_points}
+          </span>
         </div>
         <div
           style={{
@@ -119,7 +144,18 @@ function CharacterBox({ classes, character, deleteCharacter, ...rest }) {
             alignItems: 'center',
             justifyContent: 'center',
             gap: '10px',
-            marginTop: '10px'
+            marginTop: '10px',
+          }}
+        >
+          </div>
+        </div>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '10px',
+            marginTop: '10px',
           }}
         >
           <div>
@@ -129,7 +165,7 @@ function CharacterBox({ classes, character, deleteCharacter, ...rest }) {
               target="_blank"
               className={classes.btn}
             >
-              <LinkIcon />
+              <AccountBoxIcon />
             </Button>
           </div>
           <div>

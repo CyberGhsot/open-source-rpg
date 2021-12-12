@@ -13,8 +13,15 @@ model Character {
   age Int?
   gender String?
   player_name String?
+  bio String?
+  lvl Int?
+  profission String?
   current_hit_points Int @default(0)
   max_hit_points Int @default(0)
+  current_san_points Int @default(0)
+  max_san_points Int @default(0)
+  current_par_points Int @default(0)
+  max_par_points Int @default(0)
   current_picture Int @default(1)
   is_dead Boolean @default(false)
   standard_character_picture_url String?
@@ -25,6 +32,7 @@ model Character {
   attributes CharacterAttributes[]
   skills CharacterSkills[]
   rolls Roll[]
+  item CharacterItens[]
   
   @@map("character")
 }
@@ -73,6 +81,29 @@ model Skill {
 
   @@map("skills")
 }
+
+model CharacterItens {
+  character Character @relation(fields: [character_id], references: [id])
+  character_id Int
+  item Item @relation(fields: [item_id], references: [id])
+  item_id Int
+
+  value String?
+
+  @@id([character_id, item_id])
+  @@map("character_item")
+}
+
+model Item {
+  id Int @id @default(autoincrement())
+  name String
+  description String?
+
+  characters CharacterItens[]
+
+  @@map("item")
+}
+
 
 model Roll {
   id Int @id @default(autoincrement())

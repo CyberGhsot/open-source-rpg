@@ -5,15 +5,20 @@ import { useRouter } from 'next/router';
 
 import { Grid, Container, Button } from '@mui/material';
 import { withStyles } from '@mui/styles';
+import { PrismaClient } from '@prisma/client';
+import {
+  Add as AddIcon
+} from '@mui/icons-material';
+
 
 import { api } from '../../utils';
 
 import socket from '../../utils/socket';
 
 import {
-  Header, Section, StatusBar, SheetEditableRow, 
+  Header, Section, StatusBar, StatusBarPar, StatusBarSan, SheetEditableRow, ItemRow,
 
-  DiceRollModal, StatusBarModal, ChangePictureModal
+  DiceRollModal, StatusBarModal, StatusBarParModal, StatusBarSanModal, ChangePictureModal, ItensModal,
 } from '../../components';
 
 import {
@@ -22,7 +27,7 @@ import {
 
 import useModal from '../../hooks/useModal';
 
-import { prisma } from '../../database';
+const prisma = new PrismaClient();
 
 export const getServerSideProps = async ({ params }) => {
   const characterId = isNaN(params.id) ? null : Number(params.id);
@@ -51,6 +56,14 @@ export const getServerSideProps = async ({ params }) => {
             }
         }
     }
+  });
+
+  const item = await prisma.item.findMany({
+    orderBy: [
+      {
+        name: 'asc',
+      },
+    ],
   });
 
   if(!character) {
@@ -117,7 +130,52 @@ function Sheet({
         });
     });
   }
+  const onSanPointsModalSubmit = async newData => {
+    return new Promise((resolve, reject) => {
+      const data = {
+        current_san_points: Number(newData.current),
+        max_san_points: Number(newData.max)
+      }
 
+      api
+        .put(`/character/${character.id}`, data)
+        .then(() => {
+          updateCharacterState(data);
+
+          resolve();
+
+          socket.emit('update_san_points', { character_id: character.id, current: data.current_san_points, max: data.max_san_points });
+        })
+        .catch(err => {
+          alert(`Erro ao atualizar a sanidade!`, err);
+
+          reject();
+        });
+    });
+  }
+  const onParPointsModalSubmit = async newData => {
+    return new Promise((resolve, reject) => {
+      const data = {
+        current_par_points: Number(newData.current),
+        max_par_points: Number(newData.max)
+      }
+
+      api
+        .put(`/character/${character.id}`, data)
+        .then(() => {
+          updateCharacterState(data);
+
+          resolve();
+
+          socket.emit('update_par_points', { character_id: character.id, current: data.current_par_points, max: data.max_par_points });
+        })
+        .catch(err => {
+          alert(`Erro ao atualizar a exposição paranormal!`, err);
+
+          reject();
+        });
+    });
+  }
   useEffect(() => {
     setCharacter(rawCharacter);
   }, [rawCharacter]);
@@ -142,7 +200,32 @@ function Sheet({
       }}
     />
   ));
-
+  const ParPointsModal = useModal(({ close }) => (
+    <StatusBarParModal
+      type="ep"
+      onSubmit={async newData => {
+        onParPointsModalSubmit(newData).then(() => close());
+      }}
+      handleClose={close}
+      data={{
+        current: character.current_par_points,
+        max: character.max_par_points
+      }}
+    />
+  ));
+  const SanPointsModal = useModal(({ close }) => (
+    <StatusBarSanModal
+      type="sn"
+      onSubmit={async newData => {
+        onSanPointsModalSubmit(newData).then(() => close());
+      }}
+      handleClose={close}
+      data={{
+        current: character.current_san_points,
+        max: character.max_san_points
+      }}
+    />
+  ));
   const diceRollModal = useModal(({ close }) => (
     <DiceRollModal
       onDiceRoll={rollData => {
@@ -288,6 +371,44 @@ function Sheet({
                       </Grid>
                     </Grid>
                   </Grid>
+                  <Grid item xs={12} className={classes.alignCenter}>
+                    <Grid container item xs={12} className={classes.bar}>
+                      <Grid item xs={12} className={classes.barTitle}>
+                        <span>Sanidade</span>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <StatusBarSan
+                          current={character.current_san_points}
+                          max={character.max_san_points}
+                          label={`${character.current_san_points}/${character.max_san_points}`}
+                          primaryColor="#0079c9"
+                          secondaryColor="#013659"
+                          onClick={() => {
+                            SanPointsModal.appear();
+                          }}
+                        />
+                        </Grid>
+                    </Grid>
+                  </Grid>
+                  <Grid item xs={12} className={classes.alignCenter}>
+                    <Grid container item xs={12} className={classes.bar}>
+                      <Grid item xs={12} className={classes.barTitle}>
+                        <span>Exposição Paranormal</span>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <StatusBarPar
+                          current={character.current_par_points}
+                          max={character.max_par_points}
+                          label={`${character.current_par_points}/${character.max_par_points}`}
+                          primaryColor="#9000c9"
+                          secondaryColor="#2e0040"
+                          onClick={() => {
+                            ParPointsModal.appear();
+                          }}
+                        />
+                      </Grid>
+                    </Grid>
+                  </Grid>
                 </Grid>
               </Section>
             </Grid>
@@ -325,7 +446,15 @@ function Sheet({
                 </Grid>
               </Section>
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={12} md={6}>
+              <section
+              title="Pericias em Acesso Rapido"
+              >
+                <Grid container item xs={12} spacing={3}>
+                </Grid>
+              </section>
+            </Grid>
+            <Grid item xs={12} >
               <Section
                 title="Perícias"
               >
@@ -359,6 +488,50 @@ function Sheet({
                 </Grid>
               </Section>
             </Grid>
+            <Grid item xs={12} >
+                  <Section
+                    title="Inventário"
+                    renderButton={() => (
+                      <Button
+                        variant="outlined"
+                        style={{
+                          display: 'flex',
+                          alignSelf: 'center',
+                        }}
+                        onClick={() => ItensModal.appear({ operation: 'create' })}
+                      >
+                        <AddIcon />
+                      </Button>
+                    )}
+                  >
+                    <Grid
+                      item
+                      container
+                      xs={12}
+                      spacing={2}
+                      className={classes.scrollableBox}
+                    >
+                      {item.map((item, index) => (
+                        <Grid item xs={12} key={index}>
+                          <ItemRow
+                            data={item}
+                            editRow={(data) => {
+                              ItensModal.appear({ operation: 'edit', data })
+                            }}
+                            deleteRow={(data) => {
+                              confirmationModal.appear({
+                                title: 'Apagar item',
+                                text: 'Deseja apagar este item?',
+                                data: { id: data.id, type: 'item' },
+                              });
+                            }}
+                          />
+                        </Grid>
+                      ))}
+                    </Grid>
+                  </Section>
+                </Grid>
+
           </Grid>
         </Grid>
       </Container>

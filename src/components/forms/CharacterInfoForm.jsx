@@ -14,7 +14,10 @@ const CharacterInfoForm = ({
             name: initialValues.name,
             player_name: initialValues.player_name,
             age: initialValues.age,
-            gender: initialValues.gender
+            gender: initialValues.gender,
+            lvl: initialValues.lvl,
+            profission: initialValues.profission,
+            bio: initialValues.bio,
         }}
         onSubmit={(values, { setSubmitting }) => {
             onSubmit(values).then(() => setSubmitting(false));
@@ -66,6 +69,29 @@ const CharacterInfoForm = ({
                 </Grid>
                 <Grid item xs={6}>
                     <TextField
+                        type="number"
+                        variant="outlined"
+                        label="Level"
+                        name="lvl"
+                        value={values.lvl}
+                        fullWidth
+                        onChange={handleChange}
+                        error={errors.lvl}
+                    />
+                </Grid>
+                <Grid item xs={6}>
+                    <TextField
+                        variant="outlined"
+                        label="Profissão"
+                        name="profission"
+                        value={values.profission}
+                        fullWidth
+                        onChange={handleChange}
+                        error={errors.profission}
+                    />
+                </Grid>
+                <Grid item xs={6}>
+                    <TextField
                         variant="outlined"
                         label="Gênero"
                         name="gender"
@@ -73,6 +99,19 @@ const CharacterInfoForm = ({
                         fullWidth
                         onChange={handleChange}
                         error={errors.gender}
+                    />
+                </Grid>
+                <Grid item xs={12}>
+                    <TextField
+                        variant="outlined"
+                        label="Biografia"
+                        name="bio"
+                        value={values.bio}
+                        fullWidth
+                        multiline
+                        maxRows={4}
+                        onChange={handleChange}
+                        error={errors.bio}
                     />
                 </Grid>
                 <Grid item xs={12}>

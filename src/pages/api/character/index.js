@@ -1,4 +1,6 @@
-import { prisma } from '../../../database';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 function parseRelationArray(array, entityName) {
     return array.map(item => ({

@@ -19,6 +19,10 @@ io.on('connect', socket => {
         return io.to(`portrait_character_${data.character_id}`).emit('update_hit_points', data);
     });
 
+    socket.on('update_san_points', data => {
+        return io.to(`portrait_character_${data.character_id}`).emit('update_san_points', data);
+    });
+
     socket.on('dice_roll', data => {
         return io.to(`dice_character_${data.character_id}`).emit('dice_roll', data);
     });
